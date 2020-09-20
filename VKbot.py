@@ -1,24 +1,31 @@
 import requests
 from bs4 import BeautifulSoup
+from PY_32_VK_photos_backuper_VK_interface import VKUser
+from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID
 
 OAUTH_VK_URL = 'https://oauth.vk.com/authorize'
+NL = '\n'
 
 class VkBot:
 
     def __init__(self, user_id):
-        print(f"Создан объект бота для пользователя с ID: {user_id}!")
+        self.VKUser_0 = VKUser(TOKEN_VK, user_id)
+        print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!")
         self._USER_ID = user_id
         self._USERNAME = self._get_user_name_from_vk_id(user_id)
         #self._COMMANDS = ["ПРИВЕТ", "ПОГОДА", "ВРЕМЯ", "ПОКА"] # погода парсится неверно
         self._COMMANDS = ["ПРИВЕТ", "ВРЕМЯ", "ПОКА"]
 
     # getting user name
-    def _get_user_name_from_vk_id(self, user_id):
-        request = requests.get("https://vk.com/id" + str(user_id))
-        #bs = bs4.BeautifulSoup(request.text, "html.parser")
-        bs = BeautifulSoup(request.text, "html.parser")
-        user_name = self._clean_all_tag_from_str(bs.findAll("title")[0])
-        return user_name.split()[0]
+    ###??????????
+
+    # # getting user name-BACKUP
+    # def _get_user_name_from_vk_id(self, user_id):
+    #     request = requests.get("https://vk.com/id" + str(user_id))
+    #     #bs = bs4.BeautifulSoup(request.text, "html.parser")
+    #     bs = BeautifulSoup(request.text, "html.parser")
+    #     user_name = self._clean_all_tag_from_str(bs.findAll("title")[0])
+    #     return user_name.split()[0]
 
     # getting time
     def _get_time(self):
@@ -76,7 +83,7 @@ class VkBot:
     def new_message(self, message):
         # hello
         if message.upper() == self._COMMANDS[0]:
-            return f"Привет-привет, {self._USERNAME}!"
+            return f"Добрый день, {self._USERNAME}!"
 
         # # weather
         # elif message.upper() == self._COMMANDS[1]:
@@ -88,9 +95,8 @@ class VkBot:
 
         # Bye
         elif message.upper() == self._COMMANDS[2]:
-            return f"Пока-пока, {self._USERNAME}!"
+            return f"До свидания, {self._USERNAME}!"
 
         else:
-            return "Не понимаю о чем вы..."
+            return "Не понимаю о чем вы, пожалуйста, переформулируйте ваш запрос"
 
-#test_comment
