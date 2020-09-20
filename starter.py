@@ -14,7 +14,7 @@ vk = vk_api.VkApi(token=VK_API_KEY)
 longpoll = VkLongPoll(vk)
 
 bot_1 = VkBot(VK_SOI_ID)
-
+#1111111
 
 # def write_msg(user_id, message):
 #     vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
