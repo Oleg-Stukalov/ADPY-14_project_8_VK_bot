@@ -51,15 +51,6 @@ class VkBot:
             age = 18
         return age
 
-    # # getting user name-BACKUP
-    # def _get_user_name_from_vk_id(self, user_id):
-    #     request = requests.get("https://vk.com/id" + str(user_id))
-    #     #bs = bs4.BeautifulSoup(request.text, "html.parser")
-    #     bs = BeautifulSoup(request.text, "html.parser")
-    #     user_name = self._clean_all_tag_from_str(bs.findAll("title")[0])
-    #     return user_name.split()[0]
-    # getting time
-
     def _get_time(self):
         request = requests.get("https://my-calend.ru/date-and-time-today")
         #b = bs4.BeautifulSoup(request.text, "html.parser")
