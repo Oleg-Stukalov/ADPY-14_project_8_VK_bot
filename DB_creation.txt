@@ -1,0 +1,67 @@
+CREATE TABLE IF NOT EXISTS User (
+	id serial PRIMARY KEY,
+	vk_id varchar(20) NOT NULL,
+	first_name varchar(50) NOT NULL,
+	second_name varchar(50) NOT NULL,
+	age integer CHECK(integer >= 0 and integer <= 100),
+	range_age integer CHECK(integer >= 0 and integer <= 100),
+	city varchar(50)
+);
+
+CREATE TABLE IF NOT EXISTS DatingUser (
+	id serial PRIMARY KEY,
+	vk_id varchar(20) NOT NULL,
+	first_name varchar(50) NOT NULL,
+	second_name varchar(50) NOT NULL,
+	age integer CHECK(integer >= 0 and integer <= 100),
+	id_User integer REFERENCES User(id)
+);
+
+CREATE TABLE IF NOT EXISTS Photos (
+	Id serial PRIMARY KEY,
+	id_DaingUser integer REFERENCES DatingUser(id)
+	link_photo varchar(50),
+	count_likes integer
+);
+
+--DELETE FROM Genre;
+INSERT INTO Genre(Name, Date_of_appearance, Description, Rating)
+	VALUES
+		('Rock', '1958-04-17', 'Rock_music_is_a_broad_genre_of_popular_music_that_originated_as_rock_and_roll_in_the_United_States_in_the_late_1940s',
+			   5),
+		('Pop', '1948-04-17', 'Pop_is_a_genre_of_popular_music_that_originated_in_its_modern_form_during_the_mid-1950',
+			   5),
+		('Metal', '1967-08-17',  'Metal_is_a_genre_of_rock_music_that_developed_in_the_late_1960s_and_early_1970s,_largely_in_the_UK_and_the_US',
+			   2),
+		('Shanson', '1971-04-17', 'From_French_chanson_is_a_neologism_for_a_musical_genre_covering_a_range_of_Russian_songs,_including_city_romance_songs,_author_song',
+			   3),
+		('Lounge', '1958-07-27', 'Lounge_music_is_a_type_of_easy_listening_music_popular_in_the_1950s_and_1960s',
+			   5);
+
+
+--DELETE FROM Author;
+INSERT INTO Author(Name, Date_of_appearance, Producer, Rating, Description)
+	VALUES
+		('Leningrad', '2015-05-27', 'Ivanov', 2, 'Best_tracks'),
+		('Valeriya', '2017-05-24', 'Petrov', 4, 'Lyric_music'),
+		('Pughacheva', '2012-03-27', 'Sidorov', 5, 'Best_hits'),
+		('Gazmanov', '2010-01-27', 'Ivanov', 1, 'Music_for_work'),
+		('Carmen', '2008-05-17', 'Petrov', 2, 'Music_for_real_boys'),
+		('Ruki_vverh', '2011-08-27', 'Sidirov', 5, 'Music_for_girls'),
+		('Kukriniksi', '2012-02-28', 'Ivanov', 4, 'Remixes'),
+		('Krug', '2007-04-17', 'Petrov', 3, 'Shanson');
+
+
+--DELETE FROM Album;
+INSERT INTO Album(Name, Duration, Date_of_appearance, Price_for_album, Rating)
+	VALUES
+		('Infinity', 93.25, '1958-07-27', 147.87, 4),
+		('Sun_beach', 83.25, '1978-09-27', 887.87, 5),
+		('Eiforiya', 97.25, '1998-07-27', 287.87, 1),
+		('Batanya', 23.25, '1999-07-27', 147.87, 5),
+		('Skorohod_v_tumane', 83.25, '2008-07-27', 585.87, 4),
+		('Night_wish', 63.25, '2017-07-27', 187.87, 3),
+		('Green_widow', 63.25, '2018-07-27', 177.87, 5),
+		('Mushroom_juice', 93.25, '2011-08-27', 347.87, 2),
+		('Mushroom_juice2', 73.25, '2019-08-27', 147.87, 3),
+		('Mushroom_juice3', 53.25, '2020-08-27', 247.87, 4);
