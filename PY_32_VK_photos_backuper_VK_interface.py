@@ -44,13 +44,16 @@ class VKUser:
 
     def get_first_name(self):
         """ The function that getting VK user first name """
-        pass
+        user = vk.method("users.get", {"user_ids": 1})  # вместо 1 подставляете айди нужного юзера
+        first_name = user[0]['first_name']
+        return first_name
+
 
     def get_second_name(self):
         """ The function that getting VK user second (last) name """
         pass
 
-    def get_photos(self):
+    def get_photos(self, id_VK):
         # доп параметры для скачивания фото
         photo_down_params = self.get_params(
             add_params={
