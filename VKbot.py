@@ -16,13 +16,15 @@ class VkBot:
 
     def __init__(self, user_id):
         #self.VKUser_0 = VKUser(TOKEN_VK, user_id)
-        print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!")
+        print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!") #заготовка под многопользовательское использование
         self._USER_ID = user_id
         self._USERNAME = self.get_first_name(self._USER_ID)
         #self._COMMANDS = ["ПРИВЕТ", "ПОГОДА", "ВРЕМЯ", "ПОКА"] # погода парсится неверно
         self._COMMANDS = ["СЕКС", "ВОЗРАСТ ОТ", "ВОЗРАСТ ДО", "ПОЛ", "ГОРОД", "ПРЕРВАТЬ", "ПРОДОЛЖИТЬ"]
-        self.get_age(5346546)
+        self.get_age(self._USER_ID)
         self.dating_questionnaire = []
+        self.answer_1_2 = False
+        self.answer_2_2 = False
 
     def get_first_name(self, user_id):
         """ The function that getting VK user first name """
@@ -42,7 +44,11 @@ class VkBot:
         bdate = user[0].get('bdate')
         today = date.today()
         bdate_year = bdate.split('.')
-        age = today.year - int(bdate_year[-1])
+        if len(bdate) == 3:
+            age = today.year - int(bdate_year[-1])
+        else:
+            print('Возраст скрыт, для дальнейшей работы принимаем его равным 18')
+            age = 18
         return age
 
     # # getting user name-BACKUP
@@ -85,9 +91,11 @@ class VkBot:
 
     def new_message(self, message):
         # start of questions
+        question = 0
         # 0. СЕКС
         if message.upper() == self._COMMANDS[0]:
             self.dating_questionnaire.append(self._USER_ID)
+            #print('***self.dating_questionnaire:', self.dating_questionnaire)
             return f"Отлично, {self._USERNAME}! Далее вам будут заданы 4 вопроса для поиска. " \
                    f"Если вам нужно прервать опрос - наберите ПРЕРВАТЬ, для продолжения - ПРОДОЛЖИТЬ. " \
                    f"Важно точно соблюдать формат и структутру ответов! " \
@@ -97,14 +105,10 @@ class VkBot:
 
         # 1. ВОЗРАСТ ОТ
         elif message.upper() == self._COMMANDS[1]:
-            if int(message.upper()) > 0:
-                age_from = answer
-                self.dating_questionnaire.append(age_from)
-                print(f'Сохранен возраст от:', self.dating_questionnaire[1])
-            return f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО и " \
-                   f"следующим сообщением ДВУЗНАЧНОЕ число. Например: " \
-                   f"ответ 2-1: ВОЗРАСТ ДО" \
-                   f"ответ 2-2: 25"
+            self.answer_1_2 = True
+            self.dating_questionnaire.append(0)
+            print('***self.dating_questionnaire:', self.dating_questionnaire)
+
 
         # 2. ВОЗРАСТ ДО
         elif message.upper() == self._COMMANDS[2]:
@@ -143,13 +147,23 @@ class VkBot:
                    f"вопросе №{len(self.dating_questionnaire)}. Пожалуйста, для продолжения " \
                    f"введите {self._COMMANDS[len(self.dating_questionnaire)]}"
 
+        # *.Старт опроса
+        else:
+            if self.answer_1_2:
+                age_from = int(message)
+                self.dating_questionnaire.append(age_from)
+                print(f'Сохранен возраст от:', self.dating_questionnaire[1])
+                print(f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО и "
+                      f"следующим сообщением ДВУЗНАЧНОЕ число. Например: "
+                      f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
+
+            return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
+
+
+
         # # weather
         # elif message.upper() == self._COMMANDS[1]:
         #     return self._get_weather()
-
-        # *.Старт опроса
-        else:
-            return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
 
     # ###BACKUP_copy
     # def new_message(self, message):
@@ -194,7 +208,7 @@ for event in longpoll.listen():
             print(f'Новое сообщение от {event.user_id}', end='')
             bot = VkBot(event.user_id)
             write_msg(event.user_id, bot.new_message(event.text))
-            global answer
+            #global answer
             answer = event.text
             print('Text: ', answer)
             print("-------------------")
