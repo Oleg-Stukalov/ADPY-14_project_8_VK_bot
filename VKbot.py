@@ -39,12 +39,11 @@ class VkBot:
     def get_age(self, user_id):
         """ The function that calculating VK user age """
         user = vk.method("users.get", {"user_ids": user_id, "fields": 'bdate'})
-        print('****', user)
         bdate = user[0].get('bdate')
         today = date.today()
-        print('+++', bdate, today.year)
-        #age = today.year - born.year
-        #return age
+        bdate_year = bdate.split('.')
+        age = today.year - int(bdate_year[-1])
+        return age
 
     # # getting user name-BACKUP
     # def _get_user_name_from_vk_id(self, user_id):
