@@ -13,16 +13,11 @@ vk = vk_api.VkApi(token=VK_API_KEY)
 # work with messages
 longpoll = VkLongPoll(vk)
 
-bot_1 = VkBot(VK_SOI_ID)
-print(bot_1._get_user_name_from_vk_id(VK_SOI_ID))
-#print(bot_1._get_time())
-
-
 
 def write_msg(user_id, message):
     vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
-
 print("Сервис запущен!")
+
 # main cycle
 for event in longpoll.listen():
     # if we get new message
@@ -35,16 +30,17 @@ for event in longpoll.listen():
             print(f'Новое сообщение от {event.user_id}', end='')
             bot = VkBot(event.user_id)
 
-            if event.text[0] == "/":
-                write_msg(event.user_id, commander.do(event.text[1::]))
-            else:
-                write_msg(event.user_id, bot.new_message(event.text))
+            # if event.text[0] == "/":
+            #     write_msg(event.user_id, commander.do(event.text[1::]))
+            # else:
+            #     write_msg(event.user_id, bot.new_message(event.text))
 
             print('Text: ', event.text)
             print("-------------------")
 
-
-
+bot_1 = VkBot(VK_SOI_ID)
+print(bot_1._get_user_name_from_vk_id(VK_SOI_ID))
+# print(bot_1._get_time())
 
 
 
