@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 #from PY_32_VK_photos_backuper_VK_interface import VKUser
 from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID
 #from starter import answer
+from collections import Counter
 
 OAUTH_VK_URL = 'https://oauth.vk.com/authorize'
 NL = '\n'
@@ -26,16 +27,17 @@ class VkBot:
         self.answer_1_2 = False
         self.answer_2_2 = False
         self.dating_users = []
+        self.likes_dic = {}
 
     def get_first_name(self, user_id):
         """ The function that getting VK user first name """
-        user = vk.method("users.get", {"user_ids": self._USER_ID})
+        user = vk.method("users.get", {"user_ids": user_id})
         first_name = user[0].get('first_name')
         return first_name
 
     def get_second_name(self, user_id):
         """ The function that getting VK user second (last) name """
-        user = vk.method("users.get", {"user_ids": self._USER_ID})
+        user = vk.method("users.get", {"user_ids": user_id})
         second_name = user[0].get('last_name')
         return second_name
 
@@ -182,8 +184,6 @@ class VkBot:
         result = vk.method("database.getCities", {
             'access_token': self.token_VK,
             'v': '5.77',
-            'country_id': 1,
-            'q': city
         })
         city_id = result['response']['items'][0].get('id')
         users = vk.method("users.search", {
@@ -192,6 +192,8 @@ class VkBot:
             'sex': sex,
             'city': city_id,
             'status': 1,
+            'country_id': 1,
+            'q': city
             'has_photo': 1,
             'count': 50
         })
@@ -199,6 +201,19 @@ class VkBot:
             user_id = user.get('id')
             self.dating_users.append(user_id)
         print('+++self.dating_users:', self.dating_users)
+
+    def get_avatars(self, user_id):
+        """ The function gets 3 photos from album 'profile' """
+        photos = vk.method("photos.get", {
+        'owner_id': user_id,
+        'album_id': 'profile',
+        'extended': 1
+        })
+        for likes in photos['response']['items']:
+            self.likes_dic[likes['likes']['count']] = 'id'
+        sorted_keys = list(self.likes_dic.keys()).sort()
+        top_3 = Counter(sorted_keys).most_common(3)
+        #дописать!!!!!!!!!!!!!!!
 
 
 
