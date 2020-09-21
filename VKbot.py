@@ -14,8 +14,8 @@ NL = '\n'
 
 class VkBot:
 
-    def __init__(self, user_id):
-        #self.VKUser_0 = VKUser(TOKEN_VK, user_id)
+    def __init__(self, token: str, user_id):
+        self.token_VK = token
         print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!") #заготовка под многопользовательское использование
         self._USER_ID = user_id
         self._USERNAME = self.get_first_name(self._USER_ID)
@@ -25,6 +25,7 @@ class VkBot:
         self.dating_questionnaire = []
         self.answer_1_2 = False
         self.answer_2_2 = False
+        self.dating_users = []
 
     def get_first_name(self, user_id):
         """ The function that getting VK user first name """
@@ -178,9 +179,27 @@ class VkBot:
 
     def user_search(self, age_from, age_to, sex, city):
         """ The function gets search parametres and search VK users """
-        result = vk.method("database.getCities", {'country_id': 1, 'q': city})
+        result = vk.method("database.getCities", {
+            'access_token': self.token_VK,
+            'v': '5.77',
+            'country_id': 1,
+            'q': city
+        })
         city_id = result['response']['items'][0].get('id')
-        users = vk.method("users.search", {'age_from': age_from, 'age_to': age_to, 'sex': sex, 'city': city_id, 'status': 1})
+        users = vk.method("users.search", {
+            'age_from': age_from,
+            'age_to': age_to,
+            'sex': sex,
+            'city': city_id,
+            'status': 1,
+            'has_photo': 1,
+            'count': 50
+        })
+        for user in users['response']['items']:
+            user_id = user.get('id')
+            self.dating_users.append(user_id)
+        print('+++self.dating_users:', self.dating_users)
+
 
 
 # Authorization as group
@@ -203,7 +222,10 @@ for event in longpoll.listen():
             # message from user
             #request = event.text # version #1
             print(f'Новое сообщение от {event.user_id}', end='')
-            bot = VkBot(event.user_id)
+            bot = VkBot(TOKEN_VK, event.user_id)
+
+            VkBot.user_search(bot, 19, 25, 0, 'Санкт-Петербург')
+
             write_msg(event.user_id, bot.new_message(event.text))
             #global answer
             answer = event.text
