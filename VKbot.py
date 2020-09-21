@@ -81,8 +81,7 @@ class VkBot:
 
 
     def new_message(self, message):
-        # start of questions
-        question = 0
+        """ The function gets and anylizes VK user messages """
         # 0. СЕКС
         if message.upper() == self._COMMANDS[0]:
             self.dating_questionnaire.append(self._USER_ID)
@@ -107,9 +106,9 @@ class VkBot:
             self.dating_questionnaire.append(age_to)
             print(f'Сохранен возраст до:', self.dating_questionnaire[2])
             return f"Вопрос №3: напишите пол партнера. Формат ответа: ПОЛ и " \
-                   f"следующим сообщением МУЖ, ЖЕН или ЛЮБ. Например: " \
+                   f"следующим сообщением 2 (для поиска мужчин), 1 (для поиска женщин) или 0 (для поиска мужчин и женщин). Например: " \
                    f"ответ 3-1: ПОЛ" \
-                   f"ответ 2-2: ЖЕН"
+                   f"ответ 3-2: 1"
 
         # 3. ПОЛ
         elif message.upper() == self._COMMANDS[3]:
@@ -140,13 +139,13 @@ class VkBot:
 
         # *.Старт опроса
         else:
-            if self.answer_1_2:
-                age_from = int(message)
-                self.dating_questionnaire.append(age_from)
-                print(f'Сохранен возраст от:', self.dating_questionnaire[1])
-                print(f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО и "
-                      f"следующим сообщением ДВУЗНАЧНОЕ число. Например: "
-                      f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
+            # if self.answer_1_2:
+            #     age_from = int(message)
+            #     self.dating_questionnaire.append(age_from)
+            #     print(f'Сохранен возраст от:', self.dating_questionnaire[1])
+            #     print(f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО и "
+            #           f"следующим сообщением ДВУЗНАЧНОЕ число. Например: "
+            #           f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
 
             return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
 
@@ -176,6 +175,13 @@ class VkBot:
     #
     #     else:
     #         return "Не понимаю о чем вы, пожалуйста, переформулируйте ваш запрос"
+
+    def user_search(self, age_from, age_to, sex, city):
+        """ The function gets search parametres and search VK users """
+        result = vk.method("database.getCities", {'country_id': 1, 'q': city})
+        city_id = result['response']['items'][0].get('id')
+        users = vk.method("users.search", {'age_from': age_from, 'age_to': age_to, 'sex': sex, 'city': city_id, 'status': 1})
+
 
 # Authorization as group
 vk = vk_api.VkApi(token=VK_API_KEY)
