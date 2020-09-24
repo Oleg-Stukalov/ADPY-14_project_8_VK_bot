@@ -153,32 +153,6 @@ class VkBot:
             return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
 
 
-
-        # # weather
-        # elif message.upper() == self._COMMANDS[1]:
-        #     return self._get_weather()
-
-    # ###BACKUP_copy
-    # def new_message(self, message):
-    #     # hello
-    #     if message.upper() == self._COMMANDS[0]:
-    #         return f"Добрый день, {self._USERNAME}!"
-    #
-    #     # # weather
-    #     # elif message.upper() == self._COMMANDS[1]:
-    #     #     return self._get_weather()
-    #
-    #     # Time
-    #     elif message.upper() == self._COMMANDS[1]:
-    #         return self._get_time()
-    #
-    #     # Bye
-    #     elif message.upper() == self._COMMANDS[2]:
-    #         return f"До свидания, {self._USERNAME}!"
-    #
-    #     else:
-    #         return "Не понимаю о чем вы, пожалуйста, переформулируйте ваш запрос"
-
     # def user_search(self, age_from, age_to, sex, city):
     #     """ The function gets search parametres and search VK users """
     #     result = vk.method("database.getCities", {
@@ -210,15 +184,41 @@ class VkBot:
         'extended': 1
         })
         for likes in photos['response']['items']:
-            self.likes_dic[likes['likes']['count']] = 'id'
+            self.likes_dic[likes['likes']['count']] = ['sizes'][2]['url']
         sorted_keys = list(self.likes_dic.keys()).sort()
         top_3 = Counter(sorted_keys).most_common(3)
+        photo_0_url = self.likes_dic[top_3.keys(0)]
+        photo_1_url = self.likes_dic[top_3.keys(1)]
+        photo_2_url = self.likes_dic[top_3.keys(2)]
+        response_img_0 = requests.get(photo_0_url)
+        with open(f'{user_id}_0.jpg', 'wb') as f:
+            f.write(response_img_0.content)
+        response_img_1 = requests.get(photo_1_url)
+        with open(f'{user_id}_1.jpg', 'wb') as f:
+            f.write(response_img_1.content)
+        response_img_2 = requests.get(photo_2_url)
+        with open(f'{user_id}_2.jpg', 'wb') as f:
+            f.write(response_img_1.content)
+
         #дописать!!!!!!!!!!!!!!!
 
 
 
 # Authorization as group
 vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
+
+# FIXME: если нет токена, то нужно закомментировать строку 15, а строки 19-26 раскомментировать
+    #        и указать свои данные для авторизации
+    vk_session = vk_api.VkApi(token=os.getenv("VK_USER_TOKEN"))
+
+    # username: str = os.getenv("VK1_USER_LOGIN")  # FIXME: укажите свой логин вместо os.getenv("VK_USER_LOGIN")
+    # password: str = os.getenv("VK_USER_PASS")  # FIXME: укажите свой пароль вместо os.getenv("VK_USER_PASS")
+    # scope = 'users,notify,friends,photos,status,notifications,offline,wall,audio,video'
+    # vk_session = vk_api.VkApi(username, password, scope=scope, api_version='5.124')
+    # try:
+    #     vk_session.auth(token_only=True)
+    # except vk_api.AuthError as error_msg:
+    #     print(error_msg)
 
 # work with messages
 longpoll = VkLongPoll(vk)
@@ -240,6 +240,7 @@ for event in longpoll.listen():
             bot = VkBot(TOKEN_VK, event.user_id)
 
             ###VkBot.user_search(bot, 19, 25, 0, 'Санкт-Петербург')
+            VkBot.get_avatars(bot, VK_SOI_ID)
 
             write_msg(event.user_id, bot.new_message(event.text))
             #global answer
