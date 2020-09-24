@@ -179,28 +179,28 @@ class VkBot:
     #     else:
     #         return "Не понимаю о чем вы, пожалуйста, переформулируйте ваш запрос"
 
-    def user_search(self, age_from, age_to, sex, city):
-        """ The function gets search parametres and search VK users """
-        result = vk.method("database.getCities", {
-            'access_token': self.token_VK,
-            'v': '5.77',
-        })
-        city_id = result['response']['items'][0].get('id')
-        users = vk.method("users.search", {
-            'age_from': age_from,
-            'age_to': age_to,
-            'sex': sex,
-            'city': city_id,
-            'status': 1,
-            'country_id': 1,
-            'q': city
-            'has_photo': 1,
-            'count': 50
-        })
-        for user in users['response']['items']:
-            user_id = user.get('id')
-            self.dating_users.append(user_id)
-        print('+++self.dating_users:', self.dating_users)
+    # def user_search(self, age_from, age_to, sex, city):
+    #     """ The function gets search parametres and search VK users """
+    #     result = vk.method("database.getCities", {
+    #         'access_token': self.token_VK,
+    #         'v': '5.77',
+    #     })
+    #     city_id = result['response']['items'][0].get('id')
+    #     users = vk.method("users.search", {
+    #         'age_from': age_from,
+    #         'age_to': age_to,
+    #         'sex': sex,
+    #         'city': city_id,
+    #         'status': 1,
+    #         'country_id': 1,
+    #         'q': city,
+    #         'has_photo': 1,
+    #         'count': 50
+    #     })
+    #     for user in users['response']['items']:
+    #         user_id = user.get('id')
+    #         self.dating_users.append(user_id)
+    #     print('+++self.dating_users:', self.dating_users)
 
     def get_avatars(self, user_id):
         """ The function gets 3 photos from album 'profile' """
@@ -218,7 +218,7 @@ class VkBot:
 
 
 # Authorization as group
-vk = vk_api.VkApi(token=VK_API_KEY)
+vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
 
 # work with messages
 longpoll = VkLongPoll(vk)
@@ -239,7 +239,7 @@ for event in longpoll.listen():
             print(f'Новое сообщение от {event.user_id}', end='')
             bot = VkBot(TOKEN_VK, event.user_id)
 
-            VkBot.user_search(bot, 19, 25, 0, 'Санкт-Петербург')
+            ###VkBot.user_search(bot, 19, 25, 0, 'Санкт-Петербург')
 
             write_msg(event.user_id, bot.new_message(event.text))
             #global answer
