@@ -3,9 +3,10 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from datetime import date
 import requests
+import os
 from bs4 import BeautifulSoup
 #from PY_32_VK_photos_backuper_VK_interface import VKUser
-from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID
+from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, LOGIN, PWD
 #from starter import answer
 from collections import Counter
 
@@ -184,7 +185,7 @@ class VkBot:
         'extended': 1
         })
         for likes in photos['response']['items']:
-            self.likes_dic[likes['likes']['count']] = ['sizes'][2]['url']
+            self.likes_dic[likes['likes']['count']] = ['sizes'][-1]['url']
         sorted_keys = list(self.likes_dic.keys()).sort()
         top_3 = Counter(sorted_keys).most_common(3)
         photo_0_url = self.likes_dic[top_3.keys(0)]
@@ -205,25 +206,27 @@ class VkBot:
 
 
 # Authorization as group
-vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
+#vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
 
 # FIXME: если нет токена, то нужно закомментировать строку 15, а строки 19-26 раскомментировать
-    #        и указать свои данные для авторизации
-    vk_session = vk_api.VkApi(token=os.getenv("VK_USER_TOKEN"))
+#        и указать свои данные для авторизации
+#vk_session = vk_api.VkApi(token=os.getenv("VK_USER_TOKEN"))
 
-    # username: str = os.getenv("VK1_USER_LOGIN")  # FIXME: укажите свой логин вместо os.getenv("VK_USER_LOGIN")
-    # password: str = os.getenv("VK_USER_PASS")  # FIXME: укажите свой пароль вместо os.getenv("VK_USER_PASS")
-    # scope = 'users,notify,friends,photos,status,notifications,offline,wall,audio,video'
-    # vk_session = vk_api.VkApi(username, password, scope=scope, api_version='5.124')
-    # try:
-    #     vk_session.auth(token_only=True)
-    # except vk_api.AuthError as error_msg:
-    #     print(error_msg)
+username: str = LOGIN  # FIXME: укажите свой логин вместо os.getenv("VK_USER_LOGIN")
+password: str = PWD  # FIXME: укажите свой пароль вместо os.getenv("VK_USER_PASS")
+scope = 'users,notify,friends,photos,status,notifications,offline,wall,audio,video'
+vk = vk_api.VkApi(username, password, scope=scope, api_version='5.124')
+try:
+    vk.auth(token_only=True)
+except vk_api.AuthError as error_msg:
+    print(error_msg)
 
 # work with messages
+#longpoll = VkLongPoll(vk)
 longpoll = VkLongPoll(vk)
 
 def write_msg(user_id, message):
+    #vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
     vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': randrange(10 ** 7),})
 print("Сервис запущен!")
 
