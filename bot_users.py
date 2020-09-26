@@ -26,8 +26,8 @@ class UsersManager:
         return user1
 
     def save_user(self, user):
-        sa.session.add(user)
-        sa.session.commit()
+        self.db_engine.session.add(user)
+        self.db_engine.session.commit()
 
 
 def test_UserManager_stores_user_well():
