@@ -22,6 +22,7 @@ class User(Base):
     #known_users = relationship('DatingUser', backref='user')
 
     def with_(self, *args, **kwargs):
+        self.id = kwargs.get('id', self.id)
         self.vk_id = kwargs.get('vk_id', self.vk_id)
         self.first_name = kwargs.get('first_name', self.first_name)
         self.last_name = kwargs.get('last_name', self.last_name)
