@@ -20,10 +20,8 @@ class UsersManager:
         self.db_engine = db_engine
 
     def get_user(self, vk_id):
-        user1 = User()
-        user1.vk_id = vk_id
-        user1.city = 'spb'
-        return user1
+        q = self.db_engine.session.query(User).filter(User.vk_id == vk_id)
+        return q.one()
 
     def save_user(self, user):
         self.db_engine.session.add(user)
@@ -41,7 +39,7 @@ def test_UserManager_stores_user_well():
     users_manager_1 = UsersManager(dbengine)
     users_manager_1.save_user(user_1)
 
-    user_2 = users_manager_1.get_user(5)
+    user_2 = users_manager_1.get_user('5')
     print('line___')
     print('user_2.city:', user_2.city)
     print('user_2.first_name:', user_2.first_name)

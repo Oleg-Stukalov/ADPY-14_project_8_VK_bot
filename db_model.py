@@ -11,9 +11,9 @@ class User(Base):
     __tablename__ = 'user'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    vk_id = sa.Column(sa.String(20), nullable=False)
-    first_name = sa.Column(sa.String(50), nullable=False)
-    last_name = sa.Column(sa.String(50), nullable=False)
+    vk_id = sa.Column(sa.String(20), unique=True, nullable=False)
+    first_name = sa.Column(sa.String(50))
+    last_name = sa.Column(sa.String(50))
     age = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
     age_min = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
     age_max = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
