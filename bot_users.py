@@ -4,38 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import psycopg2
 
-from db_model import Base
+from db_model import Base, User, DatingUser, Photos
 
-
-class User(Base):
-    __tablename__ = 'user'
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    vk_id = sa.Column(sa.String(20), nullable=False)
-    first_name = sa.Column(sa.String(50), nullable=False)
-    last_name = sa.Column(sa.String(50), nullable=False)
-    age = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
-    age_min = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
-    age_max = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
-    sex = sa.Column(sa.Integer) #0-any, 1 - female, 2 - male
-    city = sa.Column(sa.Integer)
-    #known_users = relationship('DatingUser', backref='user')
-
-    def with_(self, *args, **kwargs):
-        self.id = kwargs.get('id', self.id)
-        self.vk_id = kwargs.get('vk_id', self.vk_id)
-        self.first_name = kwargs.get('first_name', self.first_name)
-        self.last_name = kwargs.get('last_name', self.last_name)
-        self.age = kwargs.get('age', self.age)
-        self.age_min = kwargs.get('age_min', self.age_min)
-        self.age_max = kwargs.get('age_max', self.age_max)
-        self.sex = kwargs.get('sex', self.sex)
-        self.city = kwargs.get('city', self.city)
-        return self
-
-    def withId(self, vk_id):
-        self.vk_id = vk_id
-        return self
 
 class UsersManager:
     first_name = None
@@ -56,7 +26,8 @@ class UsersManager:
         return user1
 
     def save_user(self, user):
-        self.db_engine
+        sa.session.add(user)
+        sa.session.commit()
 
 
 def test_UserManager_stores_user_well():
@@ -66,6 +37,7 @@ def test_UserManager_stores_user_well():
     print('user_1.sex:', user_1.sex)
     print('user_1.age', user_1.age)
     dbengine = DBEngine()
+    dbengine.open_db_with_recreate()
     users_manager_1 = UsersManager(dbengine)
     users_manager_1.save_user(user_1)
 
