@@ -1,18 +1,35 @@
 from db_engine import DBEngine
+import sqlalchemy as sa
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+import psycopg2
+
+from db_model import Base
 
 
-class BotUser: #left side user
-    first_name = None
-    last_name = None
-    age = None
-    age_min = None
-    age_max = None
-    sex = None
-    city = None
+class User(Base):
+    __tablename__ = 'user'
 
-    def __init__(self, vk_id):
+    id = sa.Column(sa.Integer, primary_key=True)
+    vk_id = sa.Column(sa.String(20), nullable=False)
+    first_name = sa.Column(sa.String(50), nullable=False)
+    last_name = sa.Column(sa.String(50), nullable=False)
+    age = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
+    age_min = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
+    age_max = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
+    sex = sa.Column(sa.Integer) #0-any, 1 - female, 2 - male
+    city = sa.Column(sa.Integer)
+    #known_users = relationship('DatingUser', backref='user')
+
+    def with_(self, *args, **kwargs):
+        self.vk_id = kwargs.get('vk_id', self.vk_id)
+        self.sex = kwargs.get('sex', self.sex)
+        self.age = kwargs.get('age', self.age)
+        return self
+
+    def withId(self, vk_id):
         self.vk_id = vk_id
-
+        return self
 
 class UsersManager:
     first_name = None
@@ -27,7 +44,8 @@ class UsersManager:
         self.db_engine = db_engine
 
     def get_user(self, vk_id):
-        user1 = BotUser(vk_id=vk_id)
+        user1 = User()
+        user1.vk_id = vk_id
         user1.city = 'spb'
         return user1
 
@@ -37,7 +55,10 @@ class UsersManager:
 
 def test_UserManager_stores_user_well():
     print('test started')
-    user_1 = BotUser(5)
+    user_1 = User().with_(vk_id=5, sex=2, age=30)
+    print('user_1.vk_id:', user_1.vk_id)
+    print('user_1.sex:', user_1.sex)
+    print('user_1.age', user_1.age)
     dbengine = DBEngine()
     users_manager_1 = UsersManager(dbengine)
     user_1.first_name = 'Vasia'

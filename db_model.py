@@ -7,17 +7,6 @@ import psycopg2
 Base = declarative_base()
 
 
-class User(Base):
-    __tablename__ = 'user'
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    vk_id = sa.Column(sa.String(20), nullable=False)
-    first_name = sa.Column(sa.String(50), nullable=False)
-    second_name = sa.Column(sa.String(50), nullable=False)
-    age = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
-    range_age = sa.Column(sa.Integer) # ??? integer >= 0 and integer <= 100
-    city = sa.Column(sa.String(50))
-    children = relationship('DatingUser', backref='user')
 
 
 class DatingUser(Base):
