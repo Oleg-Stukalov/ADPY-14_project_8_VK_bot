@@ -33,11 +33,6 @@ class User(Base):
         self.city = kwargs.get('city', self.city)
         return self
 
-    def withId(self, vk_id):
-        self.vk_id = vk_id
-        return self
-
-
 class DatingUser(Base):
     __tablename__ = 'datingUser'
 
@@ -46,7 +41,7 @@ class DatingUser(Base):
     first_name = sa.Column(sa.String(50), nullable=False)
     last_name = sa.Column(sa.String(50), nullable=False)
     age = sa.Column(sa.Integer)  # ??? integer >= 0 and integer <= 100
-    id_User = sa.Column(sa.Integer, sa.ForeignKey('User.id'))
+    id_User = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
     photos = relationship('Photos', backref='datingUser')
 
 class Photos(Base):
