@@ -139,3 +139,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
+/.idea/ADPY-14_project_8_VK_bot.iml
+/tokens.py
+/vk_config.v2.json
