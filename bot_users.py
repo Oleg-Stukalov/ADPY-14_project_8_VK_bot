@@ -23,8 +23,13 @@ class User(Base):
 
     def with_(self, *args, **kwargs):
         self.vk_id = kwargs.get('vk_id', self.vk_id)
-        self.sex = kwargs.get('sex', self.sex)
+        self.first_name = kwargs.get('first_name', self.first_name)
+        self.last_name = kwargs.get('last_name', self.last_name)
         self.age = kwargs.get('age', self.age)
+        self.age_min = kwargs.get('age_min', self.age_min)
+        self.age_max = kwargs.get('age_max', self.age_max)
+        self.sex = kwargs.get('sex', self.sex)
+        self.city = kwargs.get('city', self.city)
         return self
 
     def withId(self, vk_id):
@@ -55,13 +60,12 @@ class UsersManager:
 
 def test_UserManager_stores_user_well():
     print('test started')
-    user_1 = User().with_(vk_id=5, sex=2, age=30)
+    user_1 = User().with_(vk_id=5, sex=2, age=30, first_name='Vasia')
     print('user_1.vk_id:', user_1.vk_id)
     print('user_1.sex:', user_1.sex)
     print('user_1.age', user_1.age)
     dbengine = DBEngine()
     users_manager_1 = UsersManager(dbengine)
-    user_1.first_name = 'Vasia'
     users_manager_1.save_user(user_1)
 
     user_2 = users_manager_1.get_user(5)
