@@ -1,4 +1,6 @@
 from collections import Counter
+from datetime import date
+
 import requests
 from tokens import VK_ADMIN_TOKEN
 
@@ -61,3 +63,31 @@ class UsersSearch:
         with open(f'{vk_id}_2.jpg', 'wb') as f:
             f.write(response_img_1.content)
 
+    def get_first_name(self, vk_id):
+        """ The function that getting VK user first name """
+        user = self.vk.method("users.get", {"user_ids": vk_id})
+        first_name = user[0].get('first_name')
+        return first_name
+
+    def get_last_name(self, vk_id):
+        """ The function that getting VK user second (last) name """
+        user = self.vk.method("users.get", {"user_ids": vk_id})
+        last_name = user[0].get('last_name')
+        return last_name
+
+    def get_age(self, vk_id):
+        """ The function that calculating VK user age """
+        user = self.vk.method("users.get", {"user_ids": vk_id, "fields": 'bdate'})
+        bdate = user[0].get('bdate')
+        today = date.today()
+        bdate_year = bdate.split('.')
+        if len(bdate) == 3:
+            age = today.year - int(bdate_year[-1])
+        else:
+            print('Возраст скрыт, для дальнейшей работы принимаем его равным 18')
+            age = 18
+        return age
+
+    def offer_dating_user(self, vk_id):
+        """ The function sends name, last_name, age, city and 3 photos from album 'profile' """
+        pass
