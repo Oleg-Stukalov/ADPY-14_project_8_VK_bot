@@ -1,8 +1,8 @@
 from collections import Counter
 from datetime import date
-
 import requests
-from tokens import VK_ADMIN_TOKEN
+from tokens import VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
+from VKbot import write_msg
 
 class SearchParams:
     def __init__(self):
@@ -12,7 +12,7 @@ class UsersSearch:
     def __init__(self, vk):
         self.vk = vk
 
-    def search_params(self, age_min, age_max, sex=0, city, status=1):
+    def search_params(self, age_min, age_max, city, sex=0, status=1):
         """ The function gets search parametres from user """
         result = self.vk.method("database.getCities", {
             'access_token': VK_ADMIN_TOKEN,
@@ -91,3 +91,7 @@ class UsersSearch:
     def offer_dating_user(self, vk_id):
         """ The function sends name, last_name, age, city and 3 photos from album 'profile' """
         pass
+
+    def test_message_send(self, vk_id=VK_SOI_ID, message='Test_message'):
+        write_msg(vk_id, message)
+        print('Тест сообщение отправлено на vk_id',vk_id)

@@ -3,13 +3,11 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from datetime import date
 import requests
-import os
-from bs4 import BeautifulSoup
-#from PY_32_VK_photos_backuper_VK_interface import VKUser
 from bot_users import UsersManager
 from db_engine import DBEngine
 from db_model import User
-from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, VK_ADMIN_TOKEN
+from search_users import UsersSearch
+from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
 #from starter import answer
 from collections import Counter
 
@@ -24,9 +22,7 @@ class VkBot:
         print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!") #заготовка под многопользовательское использование
         self._USER_ID = user_id
         self._USERNAME = self.get_first_name(self._USER_ID)
-        #self._COMMANDS = ["ПРИВЕТ", "ПОГОДА", "ВРЕМЯ", "ПОКА"] # погода парсится неверно
         self._COMMANDS = ["СЕКС", "ВОЗРАСТ ОТ", "ВОЗРАСТ ДО", "ПОЛ", "ГОРОД", "ПРЕРВАТЬ", "ПРОДОЛЖИТЬ"]
-        #self._COMMANDS2 = {"СЕКС": self._USER_ID}
         self.get_age(self._USER_ID)
         self.dating_questionnaire = []
         self.answer_1_2 = False
@@ -51,9 +47,9 @@ class VkBot:
         user = vk.method("users.get", {"user_ids": user_id, "fields": 'bdate'})
         bdate = user[0].get('bdate')
         today = date.today()
-        bdate_year = bdate.split('.')
-        if len(bdate) == 3:
-            age = today.year - int(bdate_year[-1])
+        bdate_split = bdate.split('.')
+        if len(bdate_split) == 3:
+            age = today.year - int(bdate_split[-1])
         else:
             print('Возраст скрыт, для дальнейшей работы принимаем его равным 18')
             age = 18
@@ -167,6 +163,7 @@ class VkBot:
                 users_manager_1.save_user(user_1)
             else:
                 #ПРОВЕРИТЬ!!!!
+                pass
                 #код обновления имеющегося в БД пользователя
                 # result.first_name = user_1.first_name
                 # result.last_name = user_1.last_name
@@ -182,76 +179,10 @@ class VkBot:
             #return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
             return f"Привет, {self._USERNAME}. Твой номер {result_2.id}"
 
-
-    # def user_search(self, age_from, age_to, sex, city):
-    #     """ The function gets search parametres and search VK users """
-    #     result = vk.method("database.getCities", {
-    #         'access_token': self.token_VK,
-    #         'v': '5.77',
-    #     })
-    #     city_id = result['response']['items'][0].get('id')
-    #     users = vk.method("users.search", {
-    #         'age_from': age_from,
-    #         'age_to': age_to,
-    #         'sex': sex,
-    #         'city': city_id,
-    #         'status': 1,
-    #         'country_id': 1,
-    #         'q': city,
-    #         'has_photo': 1,
-    #         'count': 50
-    #     })
-    #     for user in users['response']['items']:
-    #         user_id = user.get('id')
-    #         self.dating_users.append(user_id)
-    #     print('+++self.dating_users:', self.dating_users)
-
-    # def get_avatars(self, user_id):
-    #     """ The function gets 3 photos from album 'profile' """
-    #     photos = vk.method("photos.get", {
-    #     'owner_id': user_id,
-    #     'album_id': 'profile',
-    #     'extended': 1
-    #     })
-    #     for likes in photos['response']['items']:
-    #         self.likes_dic[likes['likes']['count']] = ['sizes'][-1]['url']
-    #     sorted_keys = list(self.likes_dic.keys()).sort()
-    #     top_3 = Counter(sorted_keys).most_common(3)
-    #     photo_0_url = self.likes_dic[top_3.keys(0)]
-    #     photo_1_url = self.likes_dic[top_3.keys(1)]
-    #     photo_2_url = self.likes_dic[top_3.keys(2)]
-    #     response_img_0 = requests.get(photo_0_url)
-    #     with open(f'{user_id}_0.jpg', 'wb') as f:
-    #         f.write(response_img_0.content)
-    #     response_img_1 = requests.get(photo_1_url)
-    #     with open(f'{user_id}_1.jpg', 'wb') as f:
-    #         f.write(response_img_1.content)
-    #     response_img_2 = requests.get(photo_2_url)
-    #     with open(f'{user_id}_2.jpg', 'wb') as f:
-    #         f.write(response_img_1.content)
-
-        #дописать!!!!!!!!!!!!!!!
-
-
-
 # Authorization as group
 vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
 
-# # FIXME: если нет токена, то нужно закомментировать строку 15, а строки 19-26 раскомментировать
-# #        и указать свои данные для авторизации
-# #vk_session = vk_api.VkApi(token=os.getenv("VK_USER_TOKEN"))
-#
-# username: str = LOGIN  # FIXME: укажите свой логин вместо os.getenv("VK_USER_LOGIN")
-# password: str = PWD  # FIXME: укажите свой пароль вместо os.getenv("VK_USER_PASS")
-# scope = 'users,notify,friends,photos,status,notifications,offline,wall,audio,video'
-# vk = vk_api.VkApi(username, password, scope=scope, api_version='5.124')
-# try:
-#     vk.auth(token_only=True)
-# except vk_api.AuthError as error_msg:
-#     print(error_msg)
-
 # work with messages
-#longpoll = VkLongPoll(vk)
 longpoll = VkLongPoll(vk)
 
 def write_msg(user_id, message):
@@ -271,9 +202,6 @@ for event in longpoll.listen():
             print(f'Новое сообщение от {event.user_id}', end='')
             bot = VkBot(TOKEN_VK, event.user_id)
 
-            ###VkBot.user_search(bot, 19, 25, 0, 'Санкт-Петербург')
-            #VkBot.get_avatars(bot, VK_SOI_ID)
-
             write_msg(event.user_id, bot.new_message(event.text))
             #global answer
             answer = event.text
@@ -281,3 +209,4 @@ for event in longpoll.listen():
             print("-------------------")
 
 
+UsersSearch.test_message_send()
