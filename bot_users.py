@@ -21,7 +21,9 @@ class UsersManager:
 
     def get_user(self, vk_id):
         q = self.db_engine.session.query(User).filter(User.vk_id == vk_id)
-        return q.one()
+        #print('q type:', q)
+        #return q.one()
+        return q.first()
 
     def save_user(self, user):
         self.db_engine.session.add(user)
@@ -45,4 +47,4 @@ def test_UserManager_stores_user_well():
     print('user_2.first_name:', user_2.first_name)
     assert(user_2.first_name == 'Vasia')
 
-test_UserManager_stores_user_well()
+#test_UserManager_stores_user_well()

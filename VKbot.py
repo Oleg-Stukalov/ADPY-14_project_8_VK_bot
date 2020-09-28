@@ -6,6 +6,9 @@ import requests
 import os
 from bs4 import BeautifulSoup
 #from PY_32_VK_photos_backuper_VK_interface import VKUser
+from bot_users import UsersManager
+from db_engine import DBEngine
+from db_model import User
 from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, LOGIN, PWD
 #from starter import answer
 from collections import Counter
@@ -153,8 +156,21 @@ class VkBot:
             #     print(f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО и "
             #           f"следующим сообщением ДВУЗНАЧНОЕ число. Например: "
             #           f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
+            print('+++', type(self._USER_ID))
+            dbengine = DBEngine()
+            dbengine.open_db_with_recreate()
+            users_manager_1 = UsersManager(dbengine)
+            user = users_manager_1.get_user(str(self._USER_ID))
+            print('***', user)
+            user_1 = User().with_(vk_id=self._USER_ID)
+            if user == None:
+                users_manager_1.save_user(user_1)
+            user_2 = users_manager_1.get_user(str(self._USER_ID))
+            print('user_2:', user_2)
 
-            return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
+
+            #return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
+            return f"Привет, {self._USERNAME}. Твой номер "
 
 
     # def user_search(self, age_from, age_to, sex, city):
