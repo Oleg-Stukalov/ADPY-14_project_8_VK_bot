@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from bot_users import UsersManager
 from db_engine import DBEngine
 from db_model import User
-from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, LOGIN, PWD
+from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, VK_ADMIN_TOKEN
 #from starter import answer
 from collections import Counter
 
@@ -156,21 +156,31 @@ class VkBot:
             #     print(f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО и "
             #           f"следующим сообщением ДВУЗНАЧНОЕ число. Например: "
             #           f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
-            print('+++', type(self._USER_ID))
+            #print('+++type(self._USER_ID):', type(self._USER_ID))
             dbengine = DBEngine()
             dbengine.open_db_with_recreate()
             users_manager_1 = UsersManager(dbengine)
-            user = users_manager_1.get_user(str(self._USER_ID))
-            print('***', user)
+            result = users_manager_1.get_user(str(self._USER_ID))
+            #print('***result:', result)
             user_1 = User().with_(vk_id=self._USER_ID)
-            if user == None:
+            if result == None:
                 users_manager_1.save_user(user_1)
-            user_2 = users_manager_1.get_user(str(self._USER_ID))
-            print('user_2:', user_2)
-
+            else:
+                #ПРОВЕРИТЬ!!!!
+                #код обновления имеющегося в БД пользователя
+                # result.first_name = user_1.first_name
+                # result.last_name = user_1.last_name
+                # result.age =  user_1.age
+                # result.age_min = user_1.age_min
+                # result.age_max = user_1.age_max
+                # result.sex = user_1.sex
+                # result.city = user_1.city
+            result_2 = users_manager_1.get_user(str(self._USER_ID))
+            # print('===result_2.id:', result_2.id, type(result_2))
+            # print('===result_2.dir():', dir(result_2))
 
             #return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
-            return f"Привет, {self._USERNAME}. Твой номер "
+            return f"Привет, {self._USERNAME}. Твой номер {result_2.id}"
 
 
     # def user_search(self, age_from, age_to, sex, city):
