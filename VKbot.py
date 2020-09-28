@@ -6,7 +6,7 @@ import requests
 from bot_users import UsersManager
 from db_engine import DBEngine
 from db_model import User
-from search_users import UsersSearch
+#from search_users import UsersSearch
 from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
 #from starter import answer
 from collections import Counter
@@ -55,11 +55,11 @@ class VkBot:
             age = 18
         return age
 
-    def _get_time(self):
-        request = requests.get("https://my-calend.ru/date-and-time-today")
-        #b = bs4.BeautifulSoup(request.text, "html.parser")
-        b = BeautifulSoup(request.text, "html.parser")
-        return self._clean_all_tag_from_str(str(b.select(".page")[0].findAll("h2")[1])).split()[1]
+    # def _get_time(self):
+    #     request = requests.get("https://my-calend.ru/date-and-time-today")
+    #     #b = bs4.BeautifulSoup(request.text, "html.parser")
+    #     b = BeautifulSoup(request.text, "html.parser")
+    #     return self._clean_all_tag_from_str(str(b.select(".page")[0].findAll("h2")[1])).split()[1]
 
     # tags clearance
     @staticmethod
@@ -153,31 +153,21 @@ class VkBot:
             #           f"следующим сообщением ДВУЗНАЧНОЕ число. Например: "
             #           f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
             #print('+++type(self._USER_ID):', type(self._USER_ID))
-            dbengine = DBEngine()
-            dbengine.open_db_with_recreate()
+
             users_manager_1 = UsersManager(dbengine)
             result = users_manager_1.get_user(str(self._USER_ID))
             #print('***result:', result)
-            user_1 = User().with_(vk_id=self._USER_ID)
             if result == None:
-                users_manager_1.save_user(user_1)
-            else:
-                #ПРОВЕРИТЬ!!!!
-                pass
-                #код обновления имеющегося в БД пользователя
-                # result.first_name = user_1.first_name
-                # result.last_name = user_1.last_name
-                # result.age =  user_1.age
-                # result.age_min = user_1.age_min
-                # result.age_max = user_1.age_max
-                # result.sex = user_1.sex
-                # result.city = user_1.city
-            result_2 = users_manager_1.get_user(str(self._USER_ID))
-            # print('===result_2.id:', result_2.id, type(result_2))
-            # print('===result_2.dir():', dir(result_2))
+                result = User().with_(vk_id=self._USER_ID)
+                users_manager_1.save_user(result)
+            # print('===result.id:', result.id, type(result))
+            # print('===result.dir():', dir(result))
 
             #return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
-            return f"Привет, {self._USERNAME}. Твой номер {result_2.id}"
+            return f"Привет, {self._USERNAME}. Твой номер {result.id}"
+
+dbengine = DBEngine()
+dbengine.open_db_with_recreate()
 
 # Authorization as group
 vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
@@ -209,4 +199,4 @@ for event in longpoll.listen():
             print("-------------------")
 
 
-UsersSearch.test_message_send()
+#UsersSearch.test_message_send()
