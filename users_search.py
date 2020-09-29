@@ -2,7 +2,7 @@ from collections import Counter
 from datetime import date
 import requests
 from tokens import VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
-from VKbot import write_msg
+
 
 class SearchParams:
     def __init__(self):
@@ -24,9 +24,9 @@ class UsersSearch:
         last_name = user[0].get('last_name')
         return last_name
 
-    def get_age(self, user_id):
+    def get_age(self, vk_id):
         """ The function that calculating VK user age """
-        user = self.vk.method("users.get", {"user_ids": user_id, "fields": 'bdate'})
+        user = self.vk.method("users.get", {"user_ids": vk_id, "fields": 'bdate'})
         bdate = user[0].get('bdate')
         today = date.today()
         bdate_split = bdate.split('.')
@@ -46,13 +46,17 @@ class UsersSearch:
             age = 18
         return age
 
-    def get_sex(self, user_id):
-        """ The function that gets VK user sex """
-        user = self.vk.method("users.get", {"user_ids": user_id, "fields": 'sex'})
+    def get_dating_user_sex(self, vk_id):
+        """ The function that gets future dating_user sex """
+        user = self.vk.method("users.get", {"user_ids": vk_id, "fields": 'sex'})
         sex = user[0].get('sex')
+        if sex == 1: #female
+            sex = 0
+        elif sex == 2: #male
+            sex = 1
         return sex
 
-    def get_city_id(self, user_id):
+    def get_city_id(self, vk_id):
         """ The function gets VK user city_id"""
         result = self.vk.method("database.getCities", {
             'access_token': VK_ADMIN_TOKEN,
@@ -60,6 +64,19 @@ class UsersSearch:
         })
         city_id = result['response']['items'][0].get('id')
         return city_id
+
+    def get_user_ext_data(self, vk_id):
+        """ The function gets VK user external data"""
+        user = self.vk.method("users.get", {"user_ids": vk_id})
+        first_name = user[0].get('first_name')
+        last_name = user[0].get('last_name')
+        age = self.get_age(vk_id)
+        age_min = age - 5
+        age_max = age + 5
+        sex = self.get_dating_user_sex(vk_id)
+        city = self.get_city_id(vk_id)
+        status = 1
+        return first_name, last_name, age, age_min, age_max, sex, city, status
 
     def search_params(self, age_min, age_max, city, sex=0, status=1):
         """ The function gets search parametres from user """
@@ -116,6 +133,3 @@ class UsersSearch:
         """ The function sends name, last_name, age, city and 3 photos from album 'profile' """
         pass
 
-    def test_message_send(self, vk_id=VK_SOI_ID, message='Test_message'):
-        write_msg(vk_id, message)
-        print('Тест сообщение отправлено на vk_id',vk_id)

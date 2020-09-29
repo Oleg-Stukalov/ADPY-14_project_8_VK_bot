@@ -15,6 +15,7 @@ class UsersManager:
     age_max = None
     sex = None
     city = None
+    status = None
 
     def __init__(self, db_engine):
         self.db_engine = db_engine

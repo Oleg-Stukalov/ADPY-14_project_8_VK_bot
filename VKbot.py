@@ -19,19 +19,21 @@ class VkBot:
 
     def __init__(self, token: str, user_id):
         self.token_VK = token
-        print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!") #заготовка под многопользовательское использование
+        print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!") #draft for multiuser usage
         self._USER_ID = user_id
-        self.user = users_manager_1.get_user(str(self._USER_ID))
-        if self.user == None:
+        self.user = users_manager_1.get_user(str(self._USER_ID)) #check is it known user (already there is in DB)
+        if self.user == None: #if user unknown getting all external parameters from VK
+            q = UsersSearch.get_user_ext_data(UsersSearch, self._USER_ID) ###socket?????????
             self.user = User().with_(
                 vk_id = self._USER_ID,
-                first_name = UsersSearch.get_first_name(User.vk_id),
-                last_name = UsersSearch.get_last_name(User.vk_id),
-                age = UsersSearch.get_age(User.vk_id),
-                age_min = User.age - 5,
-                age_max = User.age + 5,
-                sex = UsersSearch.get_sex(User.vk_id),
-                city = UsersSearch.get_city_id(User.vk_id)
+                first_name = q[0],
+                last_name = q[1],
+                age = q[2],
+                age_min = q[3], #draft dating_user age_min (5 years smaller the current user)
+                age_max = q[4], #draft dating_user age_max (5 years bigger the current user)
+                sex = q[5], #draft dating_user sex (inversion of the current user sex)
+                city = q[6], #draft dating_user city_id (same city of the current user)
+                status = q[7] #draft dating_user status (1-free)
             )
             users_manager_1.save_user(self.user)
         ###BACKUP_COPY
@@ -39,61 +41,12 @@ class VkBot:
             #     self.user = User().with_(vk_id=self._USER_ID)
             #     users_manager_1.save_user(self.user)
 
-            users_manager_1.save_user(self.user)
-
-            self._USERNAME = self.get_first_name(self._USER_ID)
-
         self._COMMANDS = ["СЕКС", "ВОЗРАСТ ОТ", "ВОЗРАСТ ДО", "ПОЛ", "ГОРОД", "ПРЕРВАТЬ", "ПРОДОЛЖИТЬ"]
-        self.get_age(self._USER_ID)
-        print('self.get_age(self._USER_ID):', self.get_age(self._USER_ID))
         self.dating_questionnaire = []
-        self.answer_1_2 = False
-        self.answer_2_2 = False
+        # self.answer_1_2 = False
+        # self.answer_2_2 = False
         self.dating_users = []
         self.likes_dic = {}
-
-    def get_first_name(self, user_id):
-        """ The function that getting VK user first name """
-        user = vk.method("users.get", {"user_ids": user_id})
-        first_name = user[0].get('first_name')
-        return first_name
-
-    def get_second_name(self, user_id):
-        """ The function that getting VK user second (last) name """
-        user = vk.method("users.get", {"user_ids": user_id})
-        second_name = user[0].get('last_name')
-        return second_name
-
-
-
-    # def _get_time(self):
-    #     request = requests.get("https://my-calend.ru/date-and-time-today")
-    #     #b = bs4.BeautifulSoup(request.text, "html.parser")
-    #     b = BeautifulSoup(request.text, "html.parser")
-    #     return self._clean_all_tag_from_str(str(b.select(".page")[0].findAll("h2")[1])).split()[1]
-
-    # tags clearance
-    @staticmethod
-    def _clean_all_tag_from_str(string_line):
-        """
-        Очистка строки stringLine от тэгов и их содержимых
-        :param string_line: Очищаемая строка
-        :return: очищенная строка
-        """
-        result = ""
-        not_skip = True
-        for i in list(string_line):
-            if not_skip:
-                if i == "<":
-                    not_skip = False
-                else:
-                    result += i
-            else:
-                if i == ">":
-                    not_skip = True
-
-        return result
-
 
     def new_message(self, message):
         """ The function gets and anylizes VK user messages """
@@ -171,6 +124,10 @@ class VkBot:
 
             #return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
             return f"Привет, {self._USERNAME}. Твой номер {self.user.id}"
+
+    def test_message_send(self, vk_id=VK_SOI_ID, message='Test_message'):
+        write_msg(vk_id, message)
+        print('Тест сообщение отправлено на vk_id',vk_id)
 
 dbengine = DBEngine()
 dbengine.open_db_with_recreate()
