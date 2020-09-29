@@ -12,6 +12,55 @@ class UsersSearch:
     def __init__(self, vk):
         self.vk = vk
 
+    def get_first_name(self, vk_id):
+        """ The function that getting VK user first name """
+        user = self.vk.method("users.get", {"user_ids": vk_id})
+        first_name = user[0].get('first_name')
+        return first_name
+
+    def get_last_name(self, vk_id):
+        """ The function that getting VK user second (last) name """
+        user = self.vk.method("users.get", {"user_ids": vk_id})
+        last_name = user[0].get('last_name')
+        return last_name
+
+    def get_age(self, user_id):
+        """ The function that calculating VK user age """
+        user = self.vk.method("users.get", {"user_ids": user_id, "fields": 'bdate'})
+        bdate = user[0].get('bdate')
+        today = date.today()
+        bdate_split = bdate.split('.')
+        if len(bdate_split) == 3:
+            age = today.year - int(bdate_split[-1])
+            # age = today.year - int(bdate_split[-1]) - ((today.month, today.day) < int((bdate_split[-2]), int(bdate_split[-3])))
+            # try:
+            #     birthday = born.replace(year=today.year)
+            # except ValueError:  # raised when birth date is February 29 and the current year is not a leap year
+            #     birthday = born.replace(year=today.year, month=born.month + 1, day=1)
+            # # if birthday > today:
+            #     return today.year - born.year - 1
+            # else:
+            #     return today.year - born.year
+        else:
+            print('Возраст скрыт, для дальнейшей работы принимаем его равным 18')
+            age = 18
+        return age
+
+    def get_sex(self, user_id):
+        """ The function that gets VK user sex """
+        user = self.vk.method("users.get", {"user_ids": user_id, "fields": 'sex'})
+        sex = user[0].get('sex')
+        return sex
+
+    def get_city_id(self, user_id):
+        """ The function gets VK user city_id"""
+        result = self.vk.method("database.getCities", {
+            'access_token': VK_ADMIN_TOKEN,
+            'v': '5.77',
+        })
+        city_id = result['response']['items'][0].get('id')
+        return city_id
+
     def search_params(self, age_min, age_max, city, sex=0, status=1):
         """ The function gets search parametres from user """
         result = self.vk.method("database.getCities", {
@@ -62,31 +111,6 @@ class UsersSearch:
         response_img_2 = requests.get(photo_2_url)
         with open(f'{vk_id}_2.jpg', 'wb') as f:
             f.write(response_img_1.content)
-
-    def get_first_name(self, vk_id):
-        """ The function that getting VK user first name """
-        user = self.vk.method("users.get", {"user_ids": vk_id})
-        first_name = user[0].get('first_name')
-        return first_name
-
-    def get_last_name(self, vk_id):
-        """ The function that getting VK user second (last) name """
-        user = self.vk.method("users.get", {"user_ids": vk_id})
-        last_name = user[0].get('last_name')
-        return last_name
-
-    def get_age(self, vk_id):
-        """ The function that calculating VK user age """
-        user = self.vk.method("users.get", {"user_ids": vk_id, "fields": 'bdate'})
-        bdate = user[0].get('bdate')
-        today = date.today()
-        bdate_year = bdate.split('.')
-        if len(bdate) == 3:
-            age = today.year - int(bdate_year[-1])
-        else:
-            print('Возраст скрыт, для дальнейшей работы принимаем его равным 18')
-            age = 18
-        return age
 
     def offer_dating_user(self, vk_id):
         """ The function sends name, last_name, age, city and 3 photos from album 'profile' """

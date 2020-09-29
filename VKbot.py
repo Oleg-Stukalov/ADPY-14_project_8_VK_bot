@@ -3,10 +3,10 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from datetime import date
 import requests
-from bot_users import UsersManager
+from users_manager import UsersManager
 from db_engine import DBEngine
 from db_model import User
-#from search_users import UsersSearch
+from users_search import UsersSearch
 from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
 #from starter import answer
 from collections import Counter
@@ -21,9 +21,31 @@ class VkBot:
         self.token_VK = token
         print(f"{NL}Создан объект бота для пользователя с ID: {user_id}!") #заготовка под многопользовательское использование
         self._USER_ID = user_id
-        self._USERNAME = self.get_first_name(self._USER_ID)
+        self.user = users_manager_1.get_user(str(self._USER_ID))
+        if self.user == None:
+            self.user = User().with_(
+                vk_id = self._USER_ID,
+                first_name = UsersSearch.get_first_name(User.vk_id),
+                last_name = UsersSearch.get_last_name(User.vk_id),
+                age = UsersSearch.get_age(User.vk_id),
+                age_min = User.age - 5,
+                age_max = User.age + 5,
+                sex = UsersSearch.get_sex(User.vk_id),
+                city = UsersSearch.get_city_id(User.vk_id)
+            )
+            users_manager_1.save_user(self.user)
+        ###BACKUP_COPY
+            # if self.user == None:
+            #     self.user = User().with_(vk_id=self._USER_ID)
+            #     users_manager_1.save_user(self.user)
+
+            users_manager_1.save_user(self.user)
+
+            self._USERNAME = self.get_first_name(self._USER_ID)
+
         self._COMMANDS = ["СЕКС", "ВОЗРАСТ ОТ", "ВОЗРАСТ ДО", "ПОЛ", "ГОРОД", "ПРЕРВАТЬ", "ПРОДОЛЖИТЬ"]
         self.get_age(self._USER_ID)
+        print('self.get_age(self._USER_ID):', self.get_age(self._USER_ID))
         self.dating_questionnaire = []
         self.answer_1_2 = False
         self.answer_2_2 = False
@@ -42,18 +64,7 @@ class VkBot:
         second_name = user[0].get('last_name')
         return second_name
 
-    def get_age(self, user_id):
-        """ The function that calculating VK user age """
-        user = vk.method("users.get", {"user_ids": user_id, "fields": 'bdate'})
-        bdate = user[0].get('bdate')
-        today = date.today()
-        bdate_split = bdate.split('.')
-        if len(bdate_split) == 3:
-            age = today.year - int(bdate_split[-1])
-        else:
-            print('Возраст скрыт, для дальнейшей работы принимаем его равным 18')
-            age = 18
-        return age
+
 
     # def _get_time(self):
     #     request = requests.get("https://my-calend.ru/date-and-time-today")
@@ -154,20 +165,16 @@ class VkBot:
             #           f"ответ 2-1: ВОЗРАСТ ДО, ответ 2-2: 25")
             #print('+++type(self._USER_ID):', type(self._USER_ID))
 
-            users_manager_1 = UsersManager(dbengine)
-            result = users_manager_1.get_user(str(self._USER_ID))
-            #print('***result:', result)
-            if result == None:
-                result = User().with_(vk_id=self._USER_ID)
-                users_manager_1.save_user(result)
+
             # print('===result.id:', result.id, type(result))
             # print('===result.dir():', dir(result))
 
             #return f"Добрый день, {self._USERNAME}. Я сваха Диана приветствую вас в группе поиска большой и светлой любви! Если вы готовы начать поиск своей судьбы немедленно - напишите в ответ: секс"
-            return f"Привет, {self._USERNAME}. Твой номер {result.id}"
+            return f"Привет, {self._USERNAME}. Твой номер {self.user.id}"
 
 dbengine = DBEngine()
 dbengine.open_db_with_recreate()
+users_manager_1 = UsersManager(dbengine)
 
 # Authorization as group
 vk = vk_api.VkApi(token=VK_API_KEY, api_version='5.124')
