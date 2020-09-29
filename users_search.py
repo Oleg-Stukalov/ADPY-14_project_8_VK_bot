@@ -1,6 +1,9 @@
+import os
 from collections import Counter
 from datetime import date
 import requests
+from vk_api import vk_api
+
 from tokens import VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
 
 
@@ -9,8 +12,11 @@ class SearchParams:
         pass
 
 class UsersSearch:
-    def __init__(self, vk):
-        self.vk = vk
+    ###authorization
+    #vk = vk_api.VkApi(token=os.getenv("VK_ADMIN_TOKEN"))
+    vk = vk_api.VkApi(token=VK_ADMIN_TOKEN)
+    # def __init__(self, vk):
+    #     self.vk = vk
 
     def get_first_name(self, vk_id):
         """ The function that getting VK user first name """
@@ -60,9 +66,10 @@ class UsersSearch:
         """ The function gets VK user city_id"""
         result = self.vk.method("database.getCities", {
             'access_token': VK_ADMIN_TOKEN,
+            'country_id': 1,
             'v': '5.77',
         })
-        city_id = result['response']['items'][0].get('id')
+        city_id = result['items'][0].get('id')
         return city_id
 
     def get_user_ext_data(self, vk_id):
@@ -77,6 +84,21 @@ class UsersSearch:
         city = self.get_city_id(vk_id)
         status = 1
         return first_name, last_name, age, age_min, age_max, sex, city, status
+
+    ###BACKUP
+    # def get_user_ext_data(self, vk_id):
+    #     """ The function gets VK user external data"""
+    #     user = self.vk.method("users.get", {"user_ids": vk_id})
+    #     first_name = user[0].get('first_name')
+    #     last_name = user[0].get('last_name')
+    #     print('***vk_id:', vk_id)
+    #     age = self.get_age(vk_id)
+    #     age_min = age - 5
+    #     age_max = age + 5
+    #     sex = self.get_dating_user_sex(vk_id)
+    #     city = self.get_city_id(vk_id)
+    #     status = 1
+    #     return first_name, last_name, age, age_min, age_max, sex, city, status
 
     def search_params(self, age_min, age_max, city, sex=0, status=1):
         """ The function gets search parametres from user """
