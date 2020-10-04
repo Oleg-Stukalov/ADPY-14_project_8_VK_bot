@@ -131,10 +131,13 @@ class VkBot(UsersSearch):
             if len(message_split) == 3:
                 self.user.status = int(message_split[-1])
             print(f'Сохранен статус семейного положения:', self.user.age_min)
+            text = 'Заполнение анкеты завершено. Идет поиск подходящих партнеров. Пожалуйста, дождитесь данных по 10 наиболее подходящим партнерам'
+            write_msg(self._USER_ID, text)
+
             #getting dating_users vk_id list
             self.dating_users = self.get_users(self.search_params(self.user.age_min, self.user.age_max, self.user.city, self.user.sex, self.user.status))
-
-            for vk_id in self.dating_users:
+            #getting dating_user info, savingto DB
+            for number, vk_id in enumerate(self.dating_users):
                 q = self.get_user_ext_data(vk_id)
                 self.datinguser = DatingUser().with_(
                     vk_id=vk_id,
@@ -145,15 +148,21 @@ class VkBot(UsersSearch):
                 )
                 users_manager_1.save_dating_user(self.datinguser)
 
+                #get 3 photos of each dating_user
+                three_photos_info = [] #photos_info append datinguser.id
+                three_photos_info = self.get_3_photos(vk_id)
+                three_photos_info.append(self.datinguser.id)
+                #save photos_info to DB (datinguser.id, url, likes)
+                users_manager_1.save_photo_info(three_photos_info[-1], three_photos_info[0][0], three_photos_info[0][1])
+                users_manager_1.save_photo_info(three_photos_info[-1], three_photos_info[1][0], three_photos_info[1][1])
+                users_manager_1.save_photo_info(three_photos_info[-1], three_photos_info[2][0], three_photos_info[2][1])
 
-            #get 3 photos of each dating_user
+                #show 3 photos of each dating_user
+                message = f'Партнер №{number+1} выглядит так: ФОТО-1, ФОТО-2, ФОТО-3'
+                # {vk_id}_0.jpg
+                #        write_msg(vk_id, message)
 
-
-
-            #show 3 photos of each dating_user
-
-            return f"Заполнение анкеты завершено. Идет поиск подходящих партнеров. Пожалуйста, дождитесь данных по следующему партнеру в ответ напишите " \
-                   f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: +"
+            return f"Партнеры отправлены вам. В ответ напишите +номер (нравится, сохранить) или -номер (не нравится, удалить). Формат ответа: +?? или -??. Например: +4 (партнер №4 нравится, сохранить)"
             # return [f"Заполнение анкеты завершено. Идет поиск подходящих партнеров. Пожалуйста, дождитесь данных по следующему партнеру в ответ напишите " \
             #        f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: +", SEARCH_RESULT]
 
@@ -322,13 +331,6 @@ for event in longpoll.listen():
             print('Text: ', answer)
             print("-------------------")
 
-
-#UsersSearch.test_message_send()
-
-#############BACKUP_OLD
-    # def new_message(self, message):
-    #     """ The function gets and anylizes VK user messages """
-    #     # 0. СЕКС
     #
     #     #self.dating_questionnaire.append(self._COMMANDS2[message.upper()])
     #     if message.upper() == self._COMMANDS[0]:

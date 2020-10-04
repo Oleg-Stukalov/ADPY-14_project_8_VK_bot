@@ -152,6 +152,8 @@ class UsersSearch:
         response_img_2 = requests.get(photo_2_url)
         with open(f'{vk_id}_2.jpg', 'wb') as f:
             f.write(response_img_1.content)
+            # returns list: url+likes+photo
+            return [(photo_0_url, top_3.keys(0), f'{vk_id}_0.jpg'), (photo_1_url, top_3.keys(1), f'{vk_id}_1.jpg'), (photo_2_url, top_3.keys(2), f'{vk_id}_2.jpg')]
 
     def offer_dating_user(self, vk_id):
         """ The function sends name, last_name, age, city and 3 photos from album 'profile' """

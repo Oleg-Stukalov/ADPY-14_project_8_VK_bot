@@ -62,4 +62,10 @@ class Photos(Base):
     url = sa.Column(sa.String(50))
     likes_count = sa.Column(sa.Integer)
 
+    def with_(self, *args, **kwargs):
+        self.id = kwargs.get('id', self.id)
+        self.id_DatingUser = kwargs.get('id_DatingUser', self.id_DatingUser)
+        self.url = kwargs.get('url', self.url)
+        self.likes_count = kwargs.get('likes_count', self.likes_count)
+        return self
 

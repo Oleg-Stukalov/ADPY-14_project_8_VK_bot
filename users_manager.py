@@ -42,6 +42,10 @@ class UsersManager:
         self.db_engine.session.add(datinguser)
         self.db_engine.session.commit()
 
+    def save_photo_info(self, id_DatingUser, url, likes):
+        self.db_engine.session.add(id_DatingUser, url, likes)
+        self.db_engine.session.commit()
+
 
 def test_UserManager_stores_user_well():
     print('test started')
