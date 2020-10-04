@@ -17,17 +17,29 @@ class UsersManager:
     city = None
     status = None
 
+    dating_vk_id = None
+    dating_first_name = None
+    dating_last_name = None
+    dating_age = None
+    dating_id_User = None #vk_id of searcher (ForeignKey('user.id'))
+
     def __init__(self, db_engine):
         self.db_engine = db_engine
 
     def get_user(self, vk_id):
         q = self.db_engine.session.query(User).filter(User.vk_id == vk_id)
-        #print('q type:', q)
-        #return q.one()
         return q.first()
 
     def save_user(self, user):
         self.db_engine.session.add(user)
+        self.db_engine.session.commit()
+
+    def get_dating_user(self, vk_id):
+        q = self.db_engine.session.query(DatingUser).filter(DatingUser.vk_id == vk_id)
+        return q.first()
+
+    def save_dating_user(self, datinguser):
+        self.db_engine.session.add(datinguser)
         self.db_engine.session.commit()
 
 

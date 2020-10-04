@@ -5,7 +5,7 @@ from datetime import date
 import requests
 from users_manager import UsersManager
 from db_engine import DBEngine
-from db_model import User
+from db_model import User, DatingUser
 from users_search import UsersSearch
 from tokens import TOKEN_VK, VK_API_KEY, VK_SOI_ID, VK_FEDOROV_ID, VK_ADMIN_TOKEN
 #from starter import answer
@@ -50,15 +50,14 @@ class VkBot(UsersSearch):
         self._COMMAND_SEX = "ПОЛ"
         self._COMMAND_CITY = "ГОРОД"
         self._COMMAND_STATUS = "СЕМ ПОЛОЖ"
-        self._COMMAND_PLUS = "+"
-        self._COMMAND_MINUS = "-"
         self._COMMAND_TOP = "ТОП"
         self._COMMAND_NEG_NUMBER = "-"
+        self._COMMAND_POS_NUMBER = "+"
         self._COMMAND_INTERRUPTION = "ПРЕРВАТЬ"
         self.dating_questionnaire = []
         # self.answer_1_2 = False
         # self.answer_2_2 = False
-        self.dating_users = []
+        self.dating_users = [] #list of vk_id of searched dating_users
         self.likes_dic = {}
 
     def new_message(self, message):
@@ -94,51 +93,81 @@ class VkBot(UsersSearch):
         # ВОЗРАСТ ОТ
         elif message.upper().startswith(self._COMMAND_AGE_MIN):
             #нарезка, выделение возраста, сохранение
-            #self.dating_questionnaire.append(0)
-            #print('***self.dating_questionnaire:', self.dating_questionnaire)
-            #print(f'Сохранен возраст от:', self.dating_questionnaire[2])
+            message_split = message.upper().split(' ')
+            if len(message_split) == 3:
+                self.user.age_min = int(message_split[-1])
+            print(f'Сохранен возраст от:', self.user.age_min)
             return f"Вопрос №2: напишите возраст партнера ДО. Формат ответа: ВОЗРАСТ ДО ??. Например: " \
                    f"ваш ответ: ВОЗРАСТ ДО 26"
         # ВОЗРАСТ ДО
         elif message.upper().startswith(self._COMMAND_AGE_MAX):
             # нарезка, выделение возраста, сохранение
-            # self.dating_questionnaire.append(0)
-            # print('***self.dating_questionnaire:', self.dating_questionnaire)
-            # print(f'Сохранен возраст до:', self.dating_questionnaire[3])
+            message_split = message.upper().split(' ')
+            if len(message_split) == 3:
+                self.user.age_max = int(message_split[-1])
+            print(f'Сохранен возраст до:', self.user.age_max)
             return f"Вопрос №3: напишите пол партнера. Формат ответа: ПОЛ ? (2 - муж, 1 - жен, 0 - любой). Например: " \
                    f"ваш ответ: ПОЛ 1"
         # ПОЛ
         elif message.upper().startswith(self._COMMAND_SEX):
-            # sex = answer
-            # self.dating_questionnaire.append(sex)
-            # print(f'Сохранен пол:', self.dating_questionnaire[3])
+            message_split = message.upper().split(' ')
+            if len(message_split) == 2:
+                self.user.sex = int(message_split[-1])
+            print(f'Сохранен идентификатор пола:', self.user.sex)
             return f"Вопрос №4: напишите идентификатор города партнера ((https://vk.com/dev/database.getCities?params[country_id]=1&params[need_all]=0&params[count]=10&params[v]=5.124)," \
                    f" например 1 - Москва, 2 - Спб). Формат ответа: ГОРОД *. Например: ГОРОД 1"
         # ГОРОД
         elif message.upper().startswith(self._COMMAND_CITY):
-            # city = answer
-            # self.dating_questionnaire.append(city)
-            # print(f'Сохранен город:', self.dating_questionnaire[4])
+            message_split = message.upper().split(' ')
+            if len(message_split) == 2:
+                self.user.city = int(message_split[-1])
+            print(f'Сохранен идентификатор города:', self.user.city)
             return f"Вопрос №5: напишите семейное положение партнера из следующих: 1 — не женат (не замужем), 2 — встречается, 3 — помолвлен(-а), " \
                    f"4 — женат (замужем), 5 — всё сложно, 6 — в активном поиске, 7 — влюблен(-а), 8 — в гражданском браке. " \
                    f"Формат ответа: СЕМ ПОЛОЖ ?. Например: СЕМ ПОЛОЖ 1"
         # СЕМ ПОЛОЖ
         elif message.upper().startswith(self._COMMAND_STATUS):
-            # status = answer
-            # ...
-            # print(f'Сохранено семейное положение:', self.dating_questionnaire[5])
+            message_split = message.upper().split(' ')
+            if len(message_split) == 3:
+                self.user.status = int(message_split[-1])
+            print(f'Сохранен статус семейного положения:', self.user.age_min)
+            #getting dating_users vk_id list
+            self.dating_users = self.get_users(self.search_params(self.user.age_min, self.user.age_max, self.user.city, self.user.sex, self.user.status))
+
+            for vk_id in self.dating_users:
+                q = self.get_user_ext_data(vk_id)
+                self.datinguser = DatingUser().with_(
+                    vk_id=vk_id,
+                    first_name=q[0],
+                    last_name=q[1],
+                    age=q[2],
+                    id_User=self._USER_ID
+                )
+                users_manager_1.save_dating_user(self.datinguser)
+
+
+            #get 3 photos of each dating_user
+
+
+
+            #show 3 photos of each dating_user
+
             return f"Заполнение анкеты завершено. Идет поиск подходящих партнеров. Пожалуйста, дождитесь данных по следующему партнеру в ответ напишите " \
                    f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: +"
-        # +
-        elif message.upper().startswith(self._COMMAND_PLUS):
-            #сохранение партнера в БД dating_user
-            return f"Сохраняем данного партнера в БД. Пожалуйста, дождитесь данных по следующему партнеру и в ответ напишите " \
-                   f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: -"
-        # -
-        elif message.upper().startswith(self._COMMAND_MINUS):
-            #сохранение партнера в БД dating_user со статусом ДИЗЛАЙК
-            return f"Пропускаем данного партнера. Пожалуйста, дождитесь данных по следующему партнеру и в ответ напишите " \
-                   f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: -"
+            # return [f"Заполнение анкеты завершено. Идет поиск подходящих партнеров. Пожалуйста, дождитесь данных по следующему партнеру в ответ напишите " \
+            #        f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: +", SEARCH_RESULT]
+
+        # # +
+        # elif message.upper().startswith(self._COMMAND_PLUS):
+        #     #сохранение партнера в БД dating_user
+        #     return f"Сохраняем данного партнера в БД. Пожалуйста, дождитесь данных по следующему партнеру и в ответ напишите " \
+        #            f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: -"
+        # # -
+        # elif message.upper().startswith(self._COMMAND_MINUS):
+        #     #сохранение партнера в БД dating_user со статусом ДИЗЛАЙК
+        #     return f"Пропускаем данного партнера. Пожалуйста, дождитесь данных по следующему партнеру и в ответ напишите " \
+        #            f"+ (нравится) или - (не нравится). Формат ответа: + или -. Например: -"
+
         # ТОП
         elif message.upper().startswith(self._COMMAND_TOP):
             # вывод ТОП-10 СПИСКА сохраненных партнеров
@@ -146,48 +175,101 @@ class VkBot(UsersSearch):
         # -*
         elif message.upper().startswith(self._COMMAND_NEG_NUMBER):
 
-
             # -1
             if message.upper() == '-1':
-                # удаление сохраненного партнера №2
-                pass
+                # удаление сохраненного партнера №1
+                self.dating_users[0] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -2
             elif message.upper() == '-2':
                 # удаление сохраненного партнера №2
+                self.dating_users[1] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -3
             elif message.upper() == '-3':
                 # удаление сохраненного партнера №3
+                self.dating_users[2] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -4
             elif message.upper() == '-4':
                 # удаление сохраненного партнера №4
+                self.dating_users[3] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -5
             elif message.upper() == '-5':
                 # удаление сохраненного партнера №5
+                self.dating_users[4] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -6
             elif message.upper() == '-6':
                 # удаление сохраненного партнера №6
+                self.dating_users[5] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -7
             elif message.upper() == '-7':
                 # удаление сохраненного партнера №7
+                self.dating_users[6] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -8
             elif message.upper() == '-8':
                 # удаление сохраненного партнера №8
+                self.dating_users[7] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -9
             elif message.upper() == '-9':
                 # удаление сохраненного партнера №9
+                self.dating_users[8] = None
                 return f"Пожалуйста, дождитесь удаления партнера."
             # -10
             elif message.upper() == '-10':
                 # удаление сохраненного партнера №10
-                return f"Пожалуйста, дождитесь удаления партнера."
+                self.dating_users[9] = None
+                return f"Пожалуйста, дождитесь удаления партнера." # -*
+        # +*
+        elif message.upper().startswith(self._COMMAND_POS_NUMBER):
+
+            # +1
+            if message.upper() == '+1':
+                # сохраненение партнера №1
+                #datingUSER
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +2
+            elif message.upper() == '+2':
+                # сохраненение партнера №2
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +3
+            elif message.upper() == '+3':
+                # сохраненение партнера №3
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +4
+            elif message.upper() == '+4':
+                # сохраненение партнера №4
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +5
+            elif message.upper() == '+5':
+                # сохраненение партнера №5
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +6
+            elif message.upper() == '+6':
+                # сохраненение партнера №6
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +7
+            elif message.upper() == '+7':
+                # сохраненение партнера №7
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +8
+            elif message.upper() == '+8':
+                # сохраненение партнера №8
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +9
+            elif message.upper() == '+9':
+                # сохраненение партнера №9
+                return f"Пожалуйста, дождитесь сохранения партнера."
+            # +10
+            elif message.upper() == '+10':
+                # сохраненение партнера №10
+                return f"Пожалуйста, дождитесь сохранения партнера."
+
         # ПРЕРВАТЬ
         elif message.upper().startswith(self._COMMAND_INTERRUPTION):
             # выход из программы

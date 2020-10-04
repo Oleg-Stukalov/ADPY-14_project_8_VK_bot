@@ -102,17 +102,17 @@ class UsersSearch:
 
     def search_params(self, age_min, age_max, city, sex=0, status=1):
         """ The function gets search parametres from user """
-        result = self.vk.method("database.getCities", {
-            'access_token': VK_ADMIN_TOKEN,
-            'v': '5.77',
-        })
-        city_id = result['response']['items'][0].get('id')
+        # result = self.vk.method("database.getCities", {
+        #     'access_token': VK_ADMIN_TOKEN,
+        #     'v': '5.77',
+        # })
+        # city_id = result['response']['items'][0].get('id')
         search_params = {
             'access_token': VK_ADMIN_TOKEN,
             'age_from': age_min,
             'age_to': age_max,
             'sex': sex, #1 — female; 2 — male; 0 — any
-            'city': city_id,
+            'city': city,
             'status': status, #1-free
             'sort': 1, #by registaration date
             'has_photo': 1,
@@ -122,10 +122,12 @@ class UsersSearch:
         return search_params
 
     def get_users(self, search_params):
-        """ The function gets search_params dictionary??? and returns users list """
+        """ The function gets search_params dictionary and returns users list """
         users_list = []
-        self.vk.method('users.search', search_params)
-        return users_list #user_list
+        response = self.vk.method('users.search', search_params)
+        for index in response['items']:
+            users_list.append(index.get('id'))
+        return users_list
 
     def get_3_photos(self, vk_id):
         """ The function gets 3 photos from album 'profile' """
