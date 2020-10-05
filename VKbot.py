@@ -161,6 +161,7 @@ class VkBot(UsersSearch):
                 message = f'Партнер №{number+1} выглядит так: ФОТО-1, ФОТО-2, ФОТО-3'
                 # {vk_id}_0.jpg
                 #        write_msg(vk_id, message)
+                #!!!!!!!!!!!!!!!!!!!!! test first!!!!
 
             return f"Партнеры отправлены вам. В ответ напишите +номер (нравится, сохранить) или -номер (не нравится, удалить). Формат ответа: +?? или -??. Например: +4 (партнер №4 нравится, сохранить)"
             # return [f"Заполнение анкеты завершено. Идет поиск подходящих партнеров. Пожалуйста, дождитесь данных по следующему партнеру в ответ напишите " \
@@ -299,7 +300,8 @@ class VkBot(UsersSearch):
         print('Тест сообщение отправлено на vk_id',vk_id)
 
 dbengine = DBEngine()
-dbengine.open_db_with_recreate()
+#dbengine.open_db_with_recreate() #DETAIL:  ограничение datingUser_id_User_fkey в отношении таблица "datingUser" зависит от объекта таблица "user"
+dbengine.open_db()
 users_manager_1 = UsersManager(dbengine)
 
 # Authorization as group
